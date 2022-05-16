@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 
 export default class Navbar extends Component {
   render() {
@@ -9,22 +10,13 @@ export default class Navbar extends Component {
             <span className="text-lg font-bold m-2 p-2">Newzly</span>
           </div>
           <div className="navItems flex absolute right-0 space-x-4 font-bold mr-16">
-            <div>Home</div>
-            <span>|</span>
-
-            <div>Trending</div>
-            <span>|</span>
-
-            <div>Videos</div>
-            <span>|</span>
-
-            <div>Channels</div>
-            <span>|</span>
-
-            <div>About Us</div>
-            <span>|</span>
-
-            <div>Log In</div>
+            <div><Link to="/">Home</Link></div><span>|</span>
+            <div><Link to="/entertainment">Entertainment</Link></div><span>|</span>
+            <div><Link to="/business">Business</Link></div><span>|</span>
+            <div><Link to="/health">Health</Link></div><span>|</span>
+            <div><Link to="/science">Science</Link></div><span>|</span>
+            <div><Link to="/sports">Sports</Link></div><span>|</span>
+            <div><Link to="/technology">Technology</Link></div>
           </div>
         </nav>
       </div>

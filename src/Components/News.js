@@ -2,8 +2,19 @@ import React, { Component } from "react";
 import NewsItem from "./NewsItem";
 import Spinner from "./Spinner";
 import image from "./image.jfif";
+import PropTypes from "prop-types";
 
 export default class extends Component {
+  static defaultProps = {
+    country: "in",
+    pageSize: 5,
+    catagory : 'general'
+  };
+  static propTypes = {
+    country: PropTypes.string,
+    pageSize: PropTypes.number,
+    category : PropTypes.string,
+  };
   constructor() {
     super();
     this.state = {
@@ -14,7 +25,7 @@ export default class extends Component {
   }
 
   async componentDidMount() {
-    let url = `https://newsapi.org/v2/everything?domains=wsj.com&apiKey=06c34d7a268b46f68faad2c6ed0f0b05&page=1&pagesize=${this.props.pageSize}`;
+    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=06c34d7a268b46f68faad2c6ed0f0b05&page=1&pagesize=${this.props.pageSize}`;
     this.setState({ loading: true });
     let data = await fetch(url);
     let parsedData = await data.json();
@@ -27,7 +38,9 @@ export default class extends Component {
   }
 
   handlePrev = async () => {
-    let url = `https://newsapi.org/v2/everything?domains=wsj.com&apiKey=06c34d7a268b46f68faad2c6ed0f0b05&page=${
+    let url = `https://newsapi.org/v2/top-headlines?country=${
+      this.props.country
+    }&category=${this.props.category}&apiKey=06c34d7a268b46f68faad2c6ed0f0b05&page=${
       this.state.page - 1
     }&pagesize=${this.props.pageSize}`;
     this.setState({ loading: true });
@@ -42,7 +55,9 @@ export default class extends Component {
   };
 
   handleNext = async () => {
-    let url = `https://newsapi.org/v2/everything?domains=wsj.com&apiKey=06c34d7a268b46f68faad2c6ed0f0b05&page=${
+    let url = `https://newsapi.org/v2/top-headlines?country=${
+      this.props.country
+    }&category=${this.props.category}&apiKey=06c34d7a268b46f68faad2c6ed0f0b05&page=${
       this.state.page + 1
     }&pagesize=${this.props.pageSize}`;
     this.setState({ loading: true });

@@ -4,7 +4,7 @@ import loading from "./loading.gif";
 export default class spinner extends Component {
   render() {
     return (
-      <div className="ml-">
+      <div className="ml-1">
         <img src={loading} alt="loading" />
       </div>
     );
