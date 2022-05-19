@@ -3,33 +3,41 @@ import NewsItem from "./NewsItem";
 import Spinner from "./Spinner";
 import image from "./image.jfif";
 import PropTypes from "prop-types";
+import InfiniteScroll from "react-infinite-scroll-component";
 
-export default class extends Component {
+export default class News extends Component {
   static defaultProps = {
     country: "in",
     pageSize: 5,
-    catagory : 'general'
+    category: "general",
   };
   static propTypes = {
     country: PropTypes.string,
     pageSize: PropTypes.number,
-    category : PropTypes.string,
+    category: PropTypes.string,
   };
-  constructor() {
-    super();
+
+  capitalizeFirstLetter = (string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+  constructor(props) {
+    super(props);
     this.state = {
       articles: [],
       loading: false,
       page: 1,
+      totalResults: 0,
     };
+    document.title = `Newzly - ${this.capitalizeFirstLetter(
+      this.props.category
+    )}`;
   }
 
-  async componentDidMount() {
+  async updateNews() {
     let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=06c34d7a268b46f68faad2c6ed0f0b05&page=1&pagesize=${this.props.pageSize}`;
     this.setState({ loading: true });
     let data = await fetch(url);
     let parsedData = await data.json();
-    console.log(parsedData);
     this.setState({
       articles: parsedData.articles,
       totalResults: parsedData.totalResults,
@@ -37,50 +45,41 @@ export default class extends Component {
     });
   }
 
-  handlePrev = async () => {
-    let url = `https://newsapi.org/v2/top-headlines?country=${
-      this.props.country
-    }&category=${this.props.category}&apiKey=06c34d7a268b46f68faad2c6ed0f0b05&page=${
-      this.state.page - 1
-    }&pagesize=${this.props.pageSize}`;
-    this.setState({ loading: true });
-    let data = await fetch(url);
-    let parsedData = await data.json();
-    console.log(parsedData);
-    this.setState({
-      page: this.state.page - 1,
-      articles: parsedData.articles,
-      loading: false,
-    });
-  };
+  async componentDidMount() {
+    this.updateNews();
+  }
 
-  handleNext = async () => {
-    let url = `https://newsapi.org/v2/top-headlines?country=${
-      this.props.country
-    }&category=${this.props.category}&apiKey=06c34d7a268b46f68faad2c6ed0f0b05&page=${
-      this.state.page + 1
-    }&pagesize=${this.props.pageSize}`;
+  fetchMoreData = async () => {
+    this.setState({
+      page: this.state.page + 1
+    });
+    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=06c34d7a268b46f68faad2c6ed0f0b05&page=1&pagesize=${this.props.pageSize}`;
     this.setState({ loading: true });
     let data = await fetch(url);
     let parsedData = await data.json();
-    console.log(parsedData);
     this.setState({
-      page: this.state.page + 1,
-      articles: parsedData.articles,
+      articles: this.state.articles.concat(parsedData.articles),
+      totalResults: parsedData.totalResults,
       loading: false,
     });
+    
   };
 
   render() {
     return (
-      <div>
-        <div className="ml-[42rem]">{this.state.loading && <Spinner />}</div>
-        {!this.state.loading && (
-          <div className=" bg-[#E6E6FA] py-2 ">
-            <div className="grid grid-cols-3 ">
-              <div className="text-7xl font-bold mx-auto text-center flex items-center">
-                {!this.state.loading && <span>HeadLines</span>}
-              </div>
+      <>
+        <div className="text-7xl font-serif font-semibold my-4">
+          <p className="text-center tracking-wider">{this.capitalizeFirstLetter(this.props.category)}</p>
+        </div>
+        <div className="">{this.state.loading && <Spinner />}</div>
+        <div className="py-2 ">
+          <InfiniteScroll
+            dataLength={this.state.articles.length}
+            next={this.fetchMoreData}
+            hasMore={this.state.articles.length !== this.state.totalResults}
+            loader={<Spinner/>}
+          >
+            <div className="header grid grid-cols-3 ">
               {this.state.articles.map((element) => {
                 return (
                   <div key={element.url}>
@@ -91,39 +90,17 @@ export default class extends Component {
                       }
                       imageUrl={element.urlToImage ? element.urlToImage : image}
                       newsUrl={element.url}
+                      author={element.author ? element.author : "Unknown"}
+                      published={element.publishedAt}
+                      source={element.source.name}
                     />
                   </div>
                 );
               })}
             </div>
-            <div className="flex justify-center mt-10">
-              <button
-                className={`bg-slate-900 text-white flex h-10 items-center px-10 py-3 font-bold mb-2 rounded-md mr-4 ${
-                  this.state.page <= 1 && "opacity-70 cursor-not-allowed"
-                }`}
-                onClick={this.handlePrev}
-                disabled={this.state.page <= 1}
-              >
-                &larr; Prev
-              </button>
-              <button
-                className={`bg-slate-900 text-white flex h-10 items-center px-10 py-3 font-bold mb-2 rounded-md ml-4 ${
-                  this.state.page + 1 >
-                    Math.ceil(this.state.totalResults / this.props.pageSize) &&
-                  "opacity-70 cursor-not-allowed"
-                }`}
-                onClick={this.handleNext}
-                disabled={
-                  this.state.page + 1 >
-                  Math.ceil(this.state.totalResults / this.props.pageSize)
-                }
-              >
-                Next &rarr;
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+          </InfiniteScroll>
+        </div>
+      </>
     );
   }
 }
